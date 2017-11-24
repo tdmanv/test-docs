@@ -1,0 +1,163 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Installing Custom Applications &#8212; K10 0.5-beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/sphinxcontrib-images/LightBox2/lightbox2/css/lightbox.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.5-beta',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/sphinxcontrib-images/LightBox2/lightbox2/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/sphinxcontrib-images/LightBox2/lightbox2/js/lightbox.min.js"></script>
+    <script type="text/javascript" src="_static/sphinxcontrib-images/LightBox2/lightbox2-customize/jquery-noconflict.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Test Drive" href="testdrive.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installing-custom-applications">
+<span id="custom"></span><h1>Installing Custom Applications<a class="headerlink" href="#installing-custom-applications" title="Permalink to this headline">¶</a></h1>
+<p>While we have a sample application deployed for you to experiment
+with, we encourage you to deploy any of your own applications, whether
+they be custom container images or images downloaded from
+DockerHub. The only current restriction is that they need to be
+deployed into the <code class="docutils literal"><span class="pre">default</span></code> namespace.</p>
+<p>Applications can be deployed via the use of either <code class="docutils literal"><span class="pre">kubectl</span></code> (and
+the provided configuration file that was emailed to you), via the
+Kubernetes dashboard available at
+<code class="docutils literal"><span class="pre">https://your-testdrive-url.example.com/dashboard/</span></code>, or via Helm.</p>
+<p>Once you have deployed your own applications, please feel free to
+create policies that cover that application and bring the system back
+into compliance, run manual restores, test restores, etc.</p>
+<div class="section" id="using-helm">
+<h2>Using Helm<a class="headerlink" href="#using-helm" title="Permalink to this headline">¶</a></h2>
+<p>The test cluster has Helm's Tiller installed in the &quot;default&quot; namespace.
+Helm can be used to install and manage applications once <code class="docutils literal"><span class="pre">kubectl</span></code>
+is appropriately configured. Since Tiller is installed in the default
+namespace, one of the following two approaches is needed:</p>
+<ul class="simple">
+<li>Exporting an environment variable: <code class="docutils literal"><span class="pre">export</span> <span class="pre">TILLER_NAMESPACE=default</span></code>.</li>
+<li>Executing <code class="docutils literal"><span class="pre">helm</span></code> with the <code class="docutils literal"><span class="pre">--tiller-namespace</span> <span class="pre">default</span></code> flag.</li>
+</ul>
+<div class="section" id="helm-example">
+<h3>Helm example<a class="headerlink" href="#helm-example" title="Permalink to this headline">¶</a></h3>
+<p>The below example shows how one can install MongoDB through the use of
+a Helm chart.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">TILLER_NAMESPACE</span><span class="o">=</span>default
+helm install stable/mongodb-replicaset
+</pre></div>
+</div>
+<p>Note that this is a a dynamically scalable MongoDB replica set using
+Kubernetes StatefulSets and Init Containers. We will also be modifying
+this Helm chart later to provide application-consistent snapshots
+using Kanister, a Kasten framework.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/kasten.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Documentation Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">K10: Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Dashboard Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protect.html">Protecting Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="restore.html">Restoring Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Migrating Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kanister.html">Kanister: Application-Level Data Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="restrictions.html">Restrictions</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="testdrive.html">Test Drive</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="testdrive.html#getting-started">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testdrive.html#kasten-dashboard">Kasten Dashboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testdrive.html#picture-gallery-sample-app">Picture Gallery (Sample App)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testdrive.html#accessing-the-kubernetes-dashboard">Accessing the Kubernetes Dashboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testdrive.html#modifying-application-state">Modifying Application State</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="testdrive.html#restoring-applications-to-a-pristine-state">Restoring Applications to a Pristine State</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="testdrive.html">Test Drive</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Installing Custom Applications</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#using-helm">Using Helm</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#helm-example">Helm example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Kasten, Inc.
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

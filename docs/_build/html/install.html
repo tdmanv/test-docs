@@ -1,0 +1,383 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>K10: Install &#8212; K10 0.5-beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/sphinxcontrib-images/LightBox2/lightbox2/css/lightbox.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.5-beta',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/sphinxcontrib-images/LightBox2/lightbox2/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/sphinxcontrib-images/LightBox2/lightbox2/js/lightbox.min.js"></script>
+    <script type="text/javascript" src="_static/sphinxcontrib-images/LightBox2/lightbox2-customize/jquery-noconflict.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Dashboard Overview" href="overview.html" />
+    <link rel="prev" title="Quick Start" href="quickstart.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="k10-install">
+<span id="install"></span><h1>K10: Install<a class="headerlink" href="#k10-install" title="Permalink to this headline">¶</a></h1>
+<p>If you are deploying the Kasten platform in your own Kubernetes
+cluster in AWS or Google (GKE), the below instructions will help.</p>
+<div class="contents local topic" id="installation-overview">
+<p class="topic-title first">Installation Overview</p>
+<ul class="simple">
+<li><a class="reference internal" href="#prerequisites" id="id1">Prerequisites</a></li>
+<li><a class="reference internal" href="#installing-on-aws" id="id2">Installing on AWS</a><ul>
+<li><a class="reference internal" href="#ec2-ebs-permissions" id="id3">EC2 (EBS) Permissions</a></li>
+<li><a class="reference internal" href="#optional-s3-permissions" id="id4">Optional S3 Permissions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#installing-on-gke" id="id5">Installing on GKE</a><ul>
+<li><a class="reference internal" href="#service-account-scope" id="id6">Service Account Scope</a></li>
+<li><a class="reference internal" href="#using-a-separate-service-account" id="id7">Using a Separate Service Account</a><ul>
+<li><a class="reference internal" href="#creating-a-new-service-account" id="id8">Creating a new Service Account</a></li>
+<li><a class="reference internal" href="#installing-k10-with-the-new-service-account" id="id9">Installing K10 with the new Service Account</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#kasten-dashboard-access" id="id10">Kasten Dashboard Access</a><ul>
+<li><a class="reference internal" href="#accessing-via-kubectl" id="id11">Accessing via <code class="docutils literal"><span class="pre">kubectl</span></code></a></li>
+<li><a class="reference internal" href="#accessing-via-a-loadbalacer" id="id12">Accessing via a LoadBalacer</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="prerequisites">
+<h2><a class="toc-backref" href="#id1">Prerequisites</a><a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>You need the <a class="reference external" href="https://helm.sh/">Helm package manager</a></li>
+<li>Just like our <a class="reference internal" href="kanister.html"><span class="doc">Kanister</span></a> charts, you need to add
+the Kasten Helm repository to your local setup</li>
+</ul>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="gp">$</span> helm repo add kasten https://charts.kasten.io/
+</pre></div>
+</div>
+</div>
+<div class="section" id="installing-on-aws">
+<h2><a class="toc-backref" href="#id2">Installing on AWS</a><a class="headerlink" href="#installing-on-aws" title="Permalink to this headline">¶</a></h2>
+<p>To install on AWS, you need to define two environment variables that
+specify your access key id and secret access key.
+After doing so, just run the following command to install K10,
+the Kasten platform.</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="gp">$</span> helm install kasten/k10 --name<span class="o">=</span>k10 --namespace<span class="o">=</span>kasten-io <span class="se">\</span>
+          --set k10_secrets.aws_access_key_id<span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="si">}</span><span class="s2">&quot;</span> <span class="se">\</span>
+          --set k10_secrets.aws_secret_access_key<span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="si">}</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p>In particular, the above AWS access keys should have the following
+policy permissions.</p>
+<div class="section" id="ec2-ebs-permissions">
+<h3><a class="toc-backref" href="#id3">EC2 (EBS) Permissions</a><a class="headerlink" href="#ec2-ebs-permissions" title="Permalink to this headline">¶</a></h3>
+<p>The following permissions are needed by Kasten to operate on EBS, AWS
+EC2's underlying block storage solution</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;Version&quot;</span><span class="o">:</span> <span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;Statement&quot;</span><span class="o">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;Effect&quot;</span><span class="o">:</span> <span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;Action&quot;</span><span class="o">:</span> <span class="p">[</span>
+        <span class="s2">&quot;ec2:AvailabilityZone&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:CopySnapshot&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:CreateSnapshot&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:CreateTags&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:CreateVolume&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:DeleteSnapshot&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:DeleteTags&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:DeleteVolume&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:DescribeSnapshotAttribute&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:ModifySnapshotAttribute&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:DescribeAvailabilityZones&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:DescribeSnapshots&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:DescribeTags&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:DescribeVolumeAttribute&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:DescribeVolumesModifications&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:DescribeVolumeStatus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:DescribeVolumes&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:Encrypted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:ParentSnapshot&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:Region&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:ResourceTag/*&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:VolumeIops&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:VolumeSize&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ec2:VolumeType&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;aws:RequestTag/*&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;aws:TagKeys&quot;</span>
+      <span class="p">],</span>
+      <span class="s2">&quot;Resource&quot;</span><span class="o">:</span> <span class="p">[</span>
+        <span class="s2">&quot;*&quot;</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="optional-s3-permissions">
+<h3><a class="toc-backref" href="#id4">Optional S3 Permissions</a><a class="headerlink" href="#optional-s3-permissions" title="Permalink to this headline">¶</a></h3>
+<p>If you are going to migrate applications between different clusters,
+you will need an S3 bucket for it. The credentials used above should
+have the following permissions on the bucket.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">A future release will allow a completely different set of
+credentials to be used for accessing the S3 object store.</p>
+</div>
+<div class="highlight-javascript"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;Version&quot;</span><span class="o">:</span> <span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;Statement&quot;</span><span class="o">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;Effect&quot;</span><span class="o">:</span> <span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;Action&quot;</span><span class="o">:</span> <span class="p">[</span>
+        <span class="s2">&quot;s3:DeleteObject&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;s3:GetObject&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;s3:ListBucket&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;s3:PutObject&quot;</span>
+      <span class="p">],</span>
+      <span class="s2">&quot;Resource&quot;</span><span class="o">:</span> <span class="p">[</span>
+        <span class="s2">&quot;arn:aws:s3:::${BUCKET_NAME}&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;arn:aws:s3:::${BUCKET_NAME}/*&quot;</span>
+      <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="installing-on-gke">
+<h2><a class="toc-backref" href="#id5">Installing on GKE</a><a class="headerlink" href="#installing-on-gke" title="Permalink to this headline">¶</a></h2>
+<p>A <a class="reference external" href="https://cloud.google.com/compute/docs/access/service-accounts">GCP Service Account (SA)</a>
+automatically gets created with every GKE cluster.  This SA can be
+accessed within the GKE cluster to perform actions on GCP resources
+and is the simplest way to run the Kasten platform.  If the SA is
+correctly configured (see more below), just run the following command
+to install K10:</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="gp">$</span> helm install kasten/k10 --name<span class="o">=</span>k10 --namespace<span class="o">=</span>kasten-io
+</pre></div>
+</div>
+<div class="section" id="service-account-scope">
+<h3><a class="toc-backref" href="#id6">Service Account Scope</a><a class="headerlink" href="#service-account-scope" title="Permalink to this headline">¶</a></h3>
+<p>By default, the default service account scope is sufficient for
+K10. However, for cross-cluster application migration and K10 DR, we
+also do need permissions to access Google Cloud Storage (GCS)
+(<code class="docutils literal"><span class="pre">https://www.googleapis.com/auth/devstorage.read_write</span></code> or,
+alternatively, <code class="docutils literal"><span class="pre">storage-full</span></code> can also be used as an alias). The
+complete scope listing is as follows:</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">compute-rw,</span>
+<span class="go">storage-full,</span>
+<span class="go">cloud-platform,</span>
+<span class="go">https://www.googleapis.com/auth/trace.append,</span>
+<span class="go">https://www.googleapis.com/auth/service.management.readonly,</span>
+<span class="go">https://www.googleapis.com/auth/servicecontrol,</span>
+<span class="go">https://www.googleapis.com/auth/monitoring.write,</span>
+<span class="go">https://www.googleapis.com/auth/logging.write,</span>
+</pre></div>
+</div>
+<p>If the cluster was not originally created with the additional
+credential, it is technically possible to modify the scope following
+<a class="reference external" href="https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#changeserviceaccountandscopes">these instructions</a>.
+However, given the need to restart instances, that is not
+recommended. As documented below, we recommend creating a separate
+service account with the correct permissions.</p>
+<p>Alternatively, if a new cluster is being created, the modified scope
+can be set at that time. For example, it can be passed to the
+<code class="docutils literal"><span class="pre">gcloud</span></code> command via the <code class="docutils literal"><span class="pre">--scope</span></code> parameter.</p>
+</div>
+<div class="section" id="using-a-separate-service-account">
+<h3><a class="toc-backref" href="#id7">Using a Separate Service Account</a><a class="headerlink" href="#using-a-separate-service-account" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="creating-a-new-service-account">
+<h4><a class="toc-backref" href="#id8">Creating a new Service Account</a><a class="headerlink" href="#creating-a-new-service-account" title="Permalink to this headline">¶</a></h4>
+<p>K10 requires a newly created service account to contain the following
+roles:</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">roles/compute.storageAdmin</span>
+<span class="go">roles/storage.admin</span>
+</pre></div>
+</div>
+<p>The following steps should be used to create the service account and
+add the required permissions:</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">myproject=$(gcloud config get-value core/project)</span>
+<span class="go">gcloud iam service-accounts create k10-test-sa --display-name &quot;K10 Service Account&quot;</span>
+<span class="go">k10saemail=$(gcloud iam service-accounts list --filter &quot;k10-test-sa&quot; --format=&quot;value(email)&quot;)</span>
+<span class="go">gcloud iam service-accounts keys create --iam-account=${k10saemail} k10-sa-key.json</span>
+<span class="go">gcloud projects add-iam-policy-binding ${myproject} --member serviceAccount:${k10saemail} --role roles/compute.storageAdmin</span>
+<span class="go">gcloud projects add-iam-policy-binding ${myproject} --member serviceAccount:${k10saemail} --role roles/storage.admin</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="installing-k10-with-the-new-service-account">
+<h4><a class="toc-backref" href="#id9">Installing K10 with the new Service Account</a><a class="headerlink" href="#installing-k10-with-the-new-service-account" title="Permalink to this headline">¶</a></h4>
+<p>For security reasons, <code class="docutils literal"><span class="pre">helm</span></code> does not allow the use of a file
+outside the chart folder. To therefore use the <code class="docutils literal"><span class="pre">k10-sa-key.json</span></code>
+generated above, you need to fetch the chart, unpack it, and then
+install with a pointer to the newly created credentials.</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">helm fetch kasten/k10 --devel --untar</span>
+<span class="go">cp k10-sa-key.json k10/</span>
+<span class="go">helm install k10/ --name=k10 --namespace=kasten-io --set k10_secrets.google_api_key_path=k10-sa-key.json</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="kasten-dashboard-access">
+<h2><a class="toc-backref" href="#id10">Kasten Dashboard Access</a><a class="headerlink" href="#kasten-dashboard-access" title="Permalink to this headline">¶</a></h2>
+<p>In order to access <a class="reference internal" href="overview.html"><span class="doc">Kasten Dashboard</span></a>, an <a class="reference external" href="https://goo.gl/C2MCYp">ingress
+controller</a> needs to be deployed into the
+Kubernetes cluster.  The Kasten Helm chart will deploy the
+<a class="reference external" href="https://kubeapps.com/charts/stable/nginx-ingress">nginx ingress</a>
+and configure it with the NodePort service.  With the default
+configuration, the <a class="reference internal" href="overview.html"><span class="doc">Kasten Dashboard</span></a> is secured and
+can only be accessed via a user who is already authenticated using
+<code class="docutils literal"><span class="pre">kubectl</span></code> (see below).</p>
+<p>If your cluster already has deployed an ingress controller, you can
+disable the nginx ingress deployment by specifying the following
+option to the <code class="docutils literal"><span class="pre">helm</span></code> command:</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">--set nginx.enable=false</span>
+</pre></div>
+</div>
+<p>To configure nginx ingress to be exposed through the default
+LoadBalacer, please use the following option with <code class="docutils literal"><span class="pre">helm</span></code>:</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">--set nginx.controller.service.type=LoadBalacer</span>
+</pre></div>
+</div>
+<div class="section" id="accessing-via-kubectl">
+<h3><a class="toc-backref" href="#id11">Accessing via <code class="docutils literal"><span class="pre">kubectl</span></code></a><a class="headerlink" href="#accessing-via-kubectl" title="Permalink to this headline">¶</a></h3>
+<p>Run the following command to have kubectl establish a proxy connection
+to the ingress controller service</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">kubectl proxy</span>
+</pre></div>
+</div>
+<p>The dashboard will be available at:
+<code class="docutils literal"><span class="pre">http://localhost:8001/api/v1/namespaces/kasten-io/services/k10-nginx-controller:http/proxy/</span></code></p>
+</div>
+<div class="section" id="accessing-via-a-loadbalacer">
+<h3><a class="toc-backref" href="#id12">Accessing via a LoadBalacer</a><a class="headerlink" href="#accessing-via-a-loadbalacer" title="Permalink to this headline">¶</a></h3>
+<p>To access the dashboard via the LoadBalancer, you have to first find
+the LoadBalancer's public DNS/IP address:</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="go">kubectl --namespace kasten-io get services k10-nginx-controller \</span>
+<span class="go">   -o jsonpath=&#39;{.status.loadBalancer.ingress[].hostname}&#39;</span>
+</pre></div>
+</div>
+<p>The K10 dashboard will be available at the root of the DNS or IP
+address returned from the above command.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Currently, directly viewing the dashboard via the
+LoadBalancer is only protected by Basic-Auth.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/kasten.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Documentation Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">K10: Install</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-on-aws">Installing on AWS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ec2-ebs-permissions">EC2 (EBS) Permissions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optional-s3-permissions">Optional S3 Permissions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-on-gke">Installing on GKE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#service-account-scope">Service Account Scope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-a-separate-service-account">Using a Separate Service Account</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#creating-a-new-service-account">Creating a new Service Account</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#installing-k10-with-the-new-service-account">Installing K10 with the new Service Account</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#kasten-dashboard-access">Kasten Dashboard Access</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#accessing-via-kubectl">Accessing via <code class="docutils literal"><span class="pre">kubectl</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#accessing-via-a-loadbalacer">Accessing via a LoadBalacer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Dashboard Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protect.html">Protecting Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="restore.html">Restoring Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Migrating Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kanister.html">Kanister: Application-Level Data Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="restrictions.html">Restrictions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testdrive.html">Test Drive</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Kasten, Inc.
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

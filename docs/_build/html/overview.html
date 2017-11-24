@@ -1,0 +1,255 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Dashboard Overview &#8212; K10 0.5-beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/sphinxcontrib-images/LightBox2/lightbox2/css/lightbox.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.5-beta',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/sphinxcontrib-images/LightBox2/lightbox2/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/sphinxcontrib-images/LightBox2/lightbox2/js/lightbox.min.js"></script>
+    <script type="text/javascript" src="_static/sphinxcontrib-images/LightBox2/lightbox2-customize/jquery-noconflict.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Protecting Applications" href="protect.html" />
+    <link rel="prev" title="K10: Install" href="install.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dashboard-overview">
+<span id="overview"></span><h1>Dashboard Overview<a class="headerlink" href="#dashboard-overview" title="Permalink to this headline">¶</a></h1>
+<p>The K10 dashboard is broken up into a number of different
+sections. While we will return to performing actions on these later,
+you can find a brief but useful description of the sections below.</p>
+<div class="section" id="system-overview">
+<h2>System Overview<a class="headerlink" href="#system-overview" title="Permalink to this headline">¶</a></h2>
+<p>The first thing you see on the screen is a list of stateful
+applications (currently mapped to namespaces) and their associated
+workloads (stateful sets and deployments).</p>
+<a class=""
+               data-lightbox="group-f79e95c9-8943-42ea-a0e5-65f25f81abfc"
+               href="_images/dashboard_top.png"
+               title=""
+               data-title=""
+               ><img src="_images/dashboard_top.png"
+                     class=""
+                     width="100%"
+                     height="auto"
+                     alt=""/>
+                </a><p>After filtering to only include objects that have stateful services
+(defined as containing a persistent volume), the above screen breaks
+down each section into three categories:</p>
+<ul class="simple">
+<li><strong>Unmanaged</strong>: There are no protection policies that cover this
+object</li>
+<li><strong>Non-compliant</strong>: A policy applies to this object but the actions
+associated with the policy are failing (e.g., due to underlying
+storage slowness, configuration problems, etc.) or the actions
+haven't been every invoked yet (e.g., right after policy creation)</li>
+<li><strong>Compliant</strong>: Objects that both policies apply to and the policy
+SLAs are being respected</li>
+</ul>
+<p>It is also easy to see system-wide compliance by looking at the bar
+just above this view.</p>
+</div>
+<div class="section" id="namespaces-applications-and-workloads">
+<h2>Namespaces, Applications, and Workloads<a class="headerlink" href="#namespaces-applications-and-workloads" title="Permalink to this headline">¶</a></h2>
+<p>The current version of the K10 platform assumes that applications and
+namespaces have a 1:1 correspondence but that is not a requirement. As
+one will see later, policies can be defined to only operate on a
+subset of the applications residing in a namespace. Assuming you have
+already installed applications, clicking on the namespace card on the
+dashboard will take you to the following view:</p>
+<a class=""
+               data-lightbox="group-2c9a95c9-1639-460f-b518-caaf97caaf4c"
+               href="_images/overview_ns.png"
+               title=""
+               data-title=""
+               ><img src="_images/overview_ns.png"
+                     class=""
+                     width="100%"
+                     height="auto"
+                     alt=""/>
+                </a><p>A namespace or application in turn is made up of multiple workloads
+including deployments and stateful sets. In the above diagram, we see
+the GitLab application composed of three workloads and a MongoDB
+application consisting of just one. By further clicking on the
+Namespace/Application, you will see the stateful workloads it is
+composed of including labels and individual workload protection
+status:</p>
+<a class=""
+               data-lightbox="group-267dde05-ed01-4cbe-9cfa-7c9020648983"
+               href="_images/overview_workloads.png"
+               title=""
+               data-title=""
+               ><img src="_images/overview_workloads.png"
+                     class=""
+                     width="100%"
+                     height="auto"
+                     alt=""/>
+                </a><p>Finally, if you would like to view the volumes used by a workload,
+just click on the pulldown associated with each workload and select
+<code class="docutils literal"><span class="pre">Workload</span> <span class="pre">Details.</span></code></p>
+</div>
+<div class="section" id="policies">
+<h2>Policies<a class="headerlink" href="#policies" title="Permalink to this headline">¶</a></h2>
+<p>Going back to the main dashboard, you will find a section on how to
+manage policies right under the overview section. Within K10, policies
+are used to automate your data management workflows. To achieve this,
+they combine actions you want to take (e.g., snapshot), a frequency or
+schedule for how often you want to take that action, and a label-based
+selection criteria for the resources you want to manage.</p>
+<a class=""
+               data-lightbox="group-68c7dde1-8668-413b-bdd4-f87af3afd32a"
+               href="_images/dashboard_policies.png"
+               title=""
+               data-title=""
+               ><img src="_images/dashboard_policies.png"
+                     class=""
+                     width="100%"
+                     height="auto"
+                     alt=""/>
+                </a><p>If you click on <code class="docutils literal"><span class="pre">Manage</span> <span class="pre">Policies</span></code>, you will notice in the below
+screenshot that we currently do not create default policies at install
+time. As a part of bringing the system into a compliant state, you
+will later create new policies.</p>
+<a class=""
+               data-lightbox="group-1b60e3e3-c657-4757-b5d3-7975be3d7d7a"
+               href="_images/policies_none.png"
+               title=""
+               data-title=""
+               ><img src="_images/policies_none.png"
+                     class=""
+                     width="100%"
+                     height="auto"
+                     alt=""/>
+                </a></div>
+<div class="section" id="activity">
+<h2>Activity<a class="headerlink" href="#activity" title="Permalink to this headline">¶</a></h2>
+<p>Below the policy management section of the dashboard, you will find
+activity data. This consists of a graph that shows all activity in the
+system. As there are no default policy-driven actions defined in the
+system, you will see no activity after first install but, once
+policies are defined, the graph will start displaying
+activity. Mousing over the graph will display job information such as
+status, job duration, job start time, and job completion time.</p>
+<a class=""
+               data-lightbox="group-f55eca0a-a2bd-4a2f-922f-a76a13059e8c"
+               href="_images/dashboard_activity.png"
+               title=""
+               data-title=""
+               ><img src="_images/dashboard_activity.png"
+                     class=""
+                     width="100%"
+                     height="auto"
+                     alt=""/>
+                </a><p>Some of the same activity information can also be viewed in tabular
+form under the graph. In particular, the dashboard first displays a
+summary of activity in the system including total jobs, average job
+duration, number of data artifacts, the size of those artifacts, etc.</p>
+<p>Following the activity and artifact summary, the first column displays
+information on recent jobs. This includes the policy that generated
+the job, the job phases, and the start and completion times. You can
+also filtered the displayed jobs by the originating policy, failed
+jobs, and completed jobs.</p>
+<p>The second column shows recent artifacts created by the system with
+additional information on the policy and job that generated the
+artifacts along with the artifact creation time and, optionally,
+deletion time.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/kasten.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Documentation Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">K10: Install</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dashboard Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#system-overview">System Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#namespaces-applications-and-workloads">Namespaces, Applications, and Workloads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#policies">Policies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#activity">Activity</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="protect.html">Protecting Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="restore.html">Restoring Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Migrating Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kanister.html">Kanister: Application-Level Data Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="restrictions.html">Restrictions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testdrive.html">Test Drive</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Kasten, Inc.
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

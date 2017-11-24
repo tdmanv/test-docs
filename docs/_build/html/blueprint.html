@@ -1,0 +1,383 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>MongoDB Kanister Blueprint &#8212; K10 0.5-beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/sphinxcontrib-images/LightBox2/lightbox2/css/lightbox.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.5-beta',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/sphinxcontrib-images/LightBox2/lightbox2/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/sphinxcontrib-images/LightBox2/lightbox2/js/lightbox.min.js"></script>
+    <script type="text/javascript" src="_static/sphinxcontrib-images/LightBox2/lightbox2-customize/jquery-noconflict.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Restrictions" href="restrictions.html" />
+    <link rel="prev" title="Kanister: Application-Level Data Management" href="kanister.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="mongodb-kanister-blueprint">
+<h1>MongoDB Kanister Blueprint<a class="headerlink" href="#mongodb-kanister-blueprint" title="Permalink to this headline">¶</a></h1>
+<p>The below blueprint is the actual blueprint used to backup and restore
+MongoDB at the time this documentation was generated.</p>
+<div class="highlight-yaml"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+ 16
+ 17
+ 18
+ 19
+ 20
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 44
+ 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+ 60
+ 61
+ 62
+ 63
+ 64
+ 65
+ 66
+ 67
+ 68
+ 69
+ 70
+ 71
+ 72
+ 73
+ 74
+ 75
+ 76
+ 77
+ 78
+ 79
+ 80
+ 81
+ 82
+ 83
+ 84
+ 85
+ 86
+ 87
+ 88
+ 89
+ 90
+ 91
+ 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">actions</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">backup</span><span class="p p-Indicator">:</span> <span class="nl">&amp;BACKUP</span>
+    <span class="l l-Scalar l-Scalar-Plain">type</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">StatefulSet</span>
+    <span class="l l-Scalar l-Scalar-Plain">phases</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">func</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">KubeExec</span>
+      <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">takeConsistentBackup</span>
+      <span class="l l-Scalar l-Scalar-Plain">args</span><span class="p p-Indicator">:</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.StatefulSet.Namespace</span><span class="nv"> </span><span class="s">}}&quot;</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">index</span><span class="nv"> </span><span class="s">.StatefulSet.Pods</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">}}&quot;</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">kanister-sidecar</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">bash</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-o</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">errexit</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-c</span>
+        <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+          <span class="no">host=&quot;{{ index .StatefulSet.Pods 0 }}.{{ .StatefulSet.Name }}.{{ .StatefulSet.Namespace }}.svc.cluster.local&quot;</span>
+          <span class="no">primary=$(mongo --host ${host} --eval &quot;db.isMaster()[&#39;primary&#39;]&quot; | tail -n1 | cut -d &#39;:&#39; -f1)</span>
+          <span class="no">mongodb-consistent-backup -H ${primary} -P 27017 -n mongo-backup \</span>
+            <span class="no">-l /var/lib/mongodb-consistent-backup 2&gt; /var/log/kanister.log</span>
+          <span class="no">readlink -f /var/lib/mongodb-consistent-backup/mongo-backup/latest</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">func</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">KubeExec</span>
+      <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">pushToBlobStore</span>
+      <span class="l l-Scalar l-Scalar-Plain">args</span><span class="p p-Indicator">:</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.StatefulSet.Namespace</span><span class="nv"> </span><span class="s">}}&quot;</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">index</span><span class="nv"> </span><span class="s">.StatefulSet.Pods</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">}}&quot;</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">kanister-sidecar</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">bash</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-o</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">errexit</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-c</span>
+        <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+          <span class="no">base=$(basename &quot;{{ .Artifact.stdout }}&quot;)-$(date +&quot;%s&quot;)</span>
+          <span class="no">bucket_name=${KANISTER_BUCKET:-&quot;mongo.kasten.io&quot;}</span>
+          <span class="no">file=&quot;{{ .Artifact.stdout }}/rs0.tar&quot;</span>
+          <span class="no">cloud_path=&quot;s3://${bucket_name}/backups/{{ .StatefulSet.Name }}/${base}/rs0.tar&quot;</span>
+          <span class="no">cmd=(aws s3 cp)</span>
+          <span class="no">if [[ ${AWS_ACCESS_KEY_ID} =~ GOOG*  ]]</span>
+          <span class="no">then</span>
+              <span class="no">cmd=(aws --endpoint https://storage.googleapis.com s3 cp)</span>
+          <span class="no">fi</span>
+          <span class="no">${cmd[@]} ${file} ${cloud_path} &gt; /dev/null 2&gt;&gt; /var/log/kanister.log</span>
+          <span class="no">echo ${cloud_path}</span>
+  <span class="l l-Scalar l-Scalar-Plain">manualSnapshot</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">&lt;&lt;</span><span class="p p-Indicator">:</span> <span class="nv">*BACKUP</span>
+  <span class="l l-Scalar l-Scalar-Plain">snapshot</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">&lt;&lt;</span><span class="p p-Indicator">:</span> <span class="nv">*BACKUP</span>
+  <span class="l l-Scalar l-Scalar-Plain">delete</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">type</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">StatefulSet</span>
+    <span class="l l-Scalar l-Scalar-Plain">phases</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">func</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">KubeExec</span>
+      <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">removeFromObjectStore</span>
+      <span class="l l-Scalar l-Scalar-Plain">args</span><span class="p p-Indicator">:</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.StatefulSet.Namespace</span><span class="nv"> </span><span class="s">}}&quot;</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">index</span><span class="nv"> </span><span class="s">.StatefulSet.Pods</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">}}&quot;</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">kanister-sidecar</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">bash</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-o</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">errexit</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-c</span>
+        <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+          <span class="no">cloud_path=&quot;{{ .Artifact.stdout }}&quot;</span>
+          <span class="no">cmd=(aws s3 rm)</span>
+          <span class="no">if [[ ${AWS_ACCESS_KEY_ID} =~ GOOG*  ]]</span>
+          <span class="no">then</span>
+              <span class="no">cmd=(aws --endpoint https://storage.googleapis.com s3 rm)</span>
+          <span class="no">fi</span>
+          <span class="no">${cmd[@]} ${cloud_path} &gt;&gt; /var/log/kanister.log 2&gt;&gt; /var/log/kanister.log</span>
+  <span class="l l-Scalar l-Scalar-Plain">restore</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">type</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">StatefulSet</span>
+    <span class="l l-Scalar l-Scalar-Plain">phases</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">func</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">ScaleStatefulSet</span>
+      <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">scaleDown</span>
+      <span class="l l-Scalar l-Scalar-Plain">args</span><span class="p p-Indicator">:</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.StatefulSet.Namespace</span><span class="nv"> </span><span class="s">}}&quot;</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.StatefulSet.Name</span><span class="nv"> </span><span class="s">}}&quot;</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">func</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">DeleteGeneratedResources</span>
+      <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">deleteVolumes</span>
+      <span class="l l-Scalar l-Scalar-Plain">args</span><span class="p p-Indicator">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">pvc</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.StatefulSet.Namespace</span><span class="nv"> </span><span class="s">}}&quot;</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">range</span><span class="nv"> </span><span class="s">.StatefulSet.PVCS</span><span class="nv"> </span><span class="s">}}{{range</span><span class="nv"> </span><span class="s">.</span><span class="nv"> </span><span class="s">}}{{.ClaimName}}</span><span class="nv"> </span><span class="s">{{end}}{{end}}&quot;</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">func</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">ScaleStatefulSet</span>
+      <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">scaleUp</span>
+      <span class="l l-Scalar l-Scalar-Plain">args</span><span class="p p-Indicator">:</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.StatefulSet.Namespace</span><span class="nv"> </span><span class="s">}}&quot;</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.StatefulSet.Name</span><span class="nv"> </span><span class="s">}}&quot;</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">3</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">func</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">KubeExec</span>
+      <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">pullFromBlobStore</span>
+      <span class="l l-Scalar l-Scalar-Plain">args</span><span class="p p-Indicator">:</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.StatefulSet.Namespace</span><span class="nv"> </span><span class="s">}}&quot;</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">index</span><span class="nv"> </span><span class="s">.StatefulSet.Pods</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">}}&quot;</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">kanister-sidecar</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">bash</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-o</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">errexit</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-c</span>
+        <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+          <span class="no">pushd $(mktemp -d) &gt; /dev/null</span>
+          <span class="no">cmd=(aws s3 cp)</span>
+          <span class="no">if [[ ${AWS_ACCESS_KEY_ID} =~ GOOG*  ]]</span>
+          <span class="no">then</span>
+              <span class="no">cmd=(aws --endpoint https://storage.googleapis.com s3 cp)</span>
+          <span class="no">fi</span>
+          <span class="no">${cmd[@]} {{ .Artifact.stdout }} . &gt; /dev/null 2&gt; /var/log/kanister.log</span>
+          <span class="no">find $(pwd) -name rs0.tar</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">func</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">KubeExec</span>
+      <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">recoverDB</span>
+      <span class="l l-Scalar l-Scalar-Plain">args</span><span class="p p-Indicator">:</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.StatefulSet.Namespace</span><span class="nv"> </span><span class="s">}}&quot;</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">index</span><span class="nv"> </span><span class="s">.StatefulSet.Pods</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">}}&quot;</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">kanister-sidecar</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">bash</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-o</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">errexit</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-c</span>
+        <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+          <span class="no">pushd $(mktemp -d)</span>
+          <span class="no">tar xvf {{ .Artifact.stdout }} 2&gt;&gt; /var/log/kanister.log</span>
+          <span class="no">find . -name &quot;*.gz&quot; -exec gunzip {} \+ 2&gt;&gt; /var/log/kanister.log</span>
+          <span class="no">host=&quot;{{ index .StatefulSet.Pods 0 }}.{{ .StatefulSet.Name }}.{{ .StatefulSet.Namespace }}.svc.cluster.local&quot;</span>
+          <span class="no">primary=$(mongo --host ${host} --eval &quot;db.isMaster()[&#39;primary&#39;]&quot; | tail -n1 | cut -f 1 -d &#39;:&#39;)</span>
+          <span class="no">echo $host</span>
+          <span class="no">echo $primary</span>
+          <span class="no">mongorestore \</span>
+            <span class="no">--host ${primary} \</span>
+            <span class="no">--port 27017 \</span>
+            <span class="no">--drop --oplogReplay \</span>
+            <span class="no">--dir ./rs0/dump 2&gt;&gt; /var/log/kanister.log</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/kasten.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Documentation Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">K10: Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Dashboard Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protect.html">Protecting Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="restore.html">Restoring Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Migrating Applications</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="kanister.html">Kanister: Application-Level Data Management</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="kanister.html#kanister-design">Kanister Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kanister.html#installing-kanister-enabled-applications">Installing Kanister-Enabled Applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kanister.html#extending-applications-with-kanister">Extending Applications with Kanister</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kanister.html#blueprint-definition">Blueprint Definition</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="kanister.html#adding-custom-blueprints-to-kasten">Adding Custom Blueprints to Kasten</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">MongoDB Kanister Blueprint</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="restrictions.html">Restrictions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testdrive.html">Test Drive</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Kasten, Inc.
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

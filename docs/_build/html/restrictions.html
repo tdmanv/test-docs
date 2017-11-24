@@ -1,0 +1,136 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Restrictions &#8212; K10 0.5-beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/sphinxcontrib-images/LightBox2/lightbox2/css/lightbox.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.5-beta',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/sphinxcontrib-images/LightBox2/lightbox2/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/sphinxcontrib-images/LightBox2/lightbox2/js/lightbox.min.js"></script>
+    <script type="text/javascript" src="_static/sphinxcontrib-images/LightBox2/lightbox2-customize/jquery-noconflict.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Test Drive" href="testdrive.html" />
+    <link rel="prev" title="MongoDB Kanister Blueprint" href="blueprint.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="restrictions">
+<span id="id1"></span><h1>Restrictions<a class="headerlink" href="#restrictions" title="Permalink to this headline">¶</a></h1>
+<p>Here is an list of limitations on the current product. The majority of
+them will be addressed in an upcoming release.</p>
+<ul class="simple">
+<li>Secrets during restores, migration, clones.</li>
+<li>Installing custom Kanister blueprints requires support from
+us. However, if you are a power user, we would be happy to help and
+supply documentation for this.</li>
+<li>Cross-cloud migration only with Kanister</li>
+<li>Cross-project migration within Google currently not supported</li>
+<li>Kanister bucket access for migration</li>
+</ul>
+<div class="section" id="migration-restrictions">
+<h2>Migration Restrictions<a class="headerlink" href="#migration-restrictions" title="Permalink to this headline">¶</a></h2>
+<p>The current migration implementation has a few restrictions on use.</p>
+<ul class="simple">
+<li>Cross-cloud Migration: Cross-cloud migration is only supported at
+the application-level via <a class="reference internal" href="kanister.html"><span class="doc">Kanister</span></a>. Volume
+migration will be introduced in a later release.</li>
+<li>Export policies: Scheduling exports in a policy-driven automated
+manner is still under development and will be exposed in an upcoming
+release.</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/kasten.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Documentation Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">K10: Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Dashboard Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protect.html">Protecting Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="restore.html">Restoring Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Migrating Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kanister.html">Kanister: Application-Level Data Management</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Restrictions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#migration-restrictions">Migration Restrictions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="testdrive.html">Test Drive</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Kasten, Inc.
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
