@@ -1,0 +1,556 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tutorial &#8212; kanister 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Installing Kanister" href="install.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="tutorial">
+<span id="id1"></span><h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<p>In this tutorial you’ll deploy a simple application in Kubernetes. We’ll then
+incrementally use Kanister’s features to manage the application’s Data.</p>
+<div class="contents local topic" id="installation-overview">
+<p class="topic-title first">Installation Overview</p>
+<ul class="simple">
+<li><a class="reference internal" href="#prerequisites" id="id2">Prerequisites</a></li>
+<li><a class="reference internal" href="#example-application" id="id3">Example Application</a></li>
+<li><a class="reference internal" href="#invoking-kanister-actions" id="id4">Invoking Kanister Actions</a><ul>
+<li><a class="reference internal" href="#simple-blueprint" id="id5">Simple Blueprint</a></li>
+<li><a class="reference internal" href="#simple-actionset" id="id6">Simple ActionSet</a></li>
+<li><a class="reference internal" href="#get-the-action-s-status" id="id7">Get the Action’s Status</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#consuming-configmaps" id="id8">Consuming ConfigMaps</a></li>
+<li><a class="reference internal" href="#consuming-secrets" id="id9">Consuming Secrets</a></li>
+<li><a class="reference internal" href="#artifacts" id="id10">Artifacts</a><ul>
+<li><a class="reference internal" href="#output-artifacts" id="id11">Output Artifacts</a></li>
+<li><a class="reference internal" href="#input-artifacts" id="id12">Input Artifacts</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#time" id="id13">Time</a></li>
+<li><a class="reference internal" href="#using-kanctl-to-chain-actionsets" id="id14">Using kanctl to Chain ActionSets</a></li>
+</ul>
+</div>
+<div class="section" id="prerequisites">
+<h2><a class="toc-backref" href="#id2">Prerequisites</a><a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>kubernetes 1.7 or higher</li>
+<li><a class="reference external" href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">kubectl</a> installed
+and setup</li>
+<li>A running K10 controller. See <a class="reference internal" href="install.html#install"><span class="std std-ref">Installing Kanister</span></a></li>
+</ul>
+</div>
+<div class="section" id="example-application">
+<h2><a class="toc-backref" href="#id3">Example Application</a><a class="headerlink" href="#example-application" title="Permalink to this headline">¶</a></h2>
+<p>This tutorial begins by deploying our sample application. Our application is
+contrived, but useful for demonstrating Kanister’s features. Every Second, it
+appends the current time to a log file. The image we deploy contains the aws
+sdk.</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">$ cat &lt;&lt;EOF | kubectl create -f -</span>
+<span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">apps/v1beta1</span>
+<span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time-logger</span>
+<span class="l l-Scalar l-Scalar-Plain">spec</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">replicas</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+  <span class="l l-Scalar l-Scalar-Plain">template</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
+      <span class="l l-Scalar l-Scalar-Plain">labels</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">app</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time-logger</span>
+  <span class=" -Error"> </span><span class="l l-Scalar l-Scalar-Plain">spec</span><span class="p p-Indicator">:</span>
+     <span class="l l-Scalar l-Scalar-Plain">containers</span><span class="p p-Indicator">:</span>
+     <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">test-container</span>
+       <span class="l l-Scalar l-Scalar-Plain">image</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">containerlabs/aws-sdk</span>
+       <span class="l l-Scalar l-Scalar-Plain">command</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;sh&quot;</span><span class="p p-Indicator">,</span> <span class="s">&quot;-c&quot;</span><span class="p p-Indicator">]</span>
+       <span class="l l-Scalar l-Scalar-Plain">args</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">[</span><span class="s">&quot;while</span><span class="nv"> </span><span class="s">true;</span><span class="nv"> </span><span class="s">do</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">x</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">$(seq</span><span class="nv"> </span><span class="s">1200);</span><span class="nv"> </span><span class="s">do</span><span class="nv"> </span><span class="s">date</span><span class="nv"> </span><span class="s">&gt;&gt;</span><span class="nv"> </span><span class="s">/var/log/time.log;</span><span class="nv"> </span><span class="s">sleep</span><span class="nv"> </span><span class="s">1;</span><span class="nv"> </span><span class="s">done;</span><span class="nv"> </span><span class="s">truncate</span><span class="nv"> </span><span class="s">/var/log/time.log</span><span class="nv"> </span><span class="s">--size</span><span class="nv"> </span><span class="s">0;</span><span class="nv"> </span><span class="s">done&quot;</span><span class="p p-Indicator">]</span>
+<span class="l l-Scalar l-Scalar-Plain">EOF</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="invoking-kanister-actions">
+<h2><a class="toc-backref" href="#id4">Invoking Kanister Actions</a><a class="headerlink" href="#invoking-kanister-actions" title="Permalink to this headline">¶</a></h2>
+<p>The first Kanister CustomResource we’re going to deploy is a blueprint.
+Blueprints are a set of instructions that tell the controller how to perform an
+action. This blueprint has a single action called <cite>backup</cite>. The action <cite>backup</cite>
+has a single phase named <cite>backupToS3</cite>. <cite>backupToS3</cite> invokes the Kanister
+function <cite>KubeExec</cite>, which is similar to invoking <cite>kubectl exec …</cite>. All
+Kanister functions accept a list of strings as arguments. <cite>KubeExec</cite>’s first few
+arguments specify which container to run in. The last arguments are the command
+we’re running.  In this case, we’ll create a blueprint which will simply dump
+the timelog to stdout.</p>
+<div class="section" id="simple-blueprint">
+<h3><a class="toc-backref" href="#id5">Simple Blueprint</a><a class="headerlink" href="#simple-blueprint" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">$ cat &lt;&lt;EOF | kubectl create -f -</span>
+<span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">cr.kanister.io/v1alpha1</span>
+<span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Blueprint</span>
+<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time-log-bp</span>
+<span class="l l-Scalar l-Scalar-Plain">actions</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">backup</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">type</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+    <span class="l l-Scalar l-Scalar-Plain">phases</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">func</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">KubeExec</span>
+      <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">backupToS3</span>
+      <span class="l l-Scalar l-Scalar-Plain">args</span><span class="p p-Indicator">:</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.Deployment.Namespace</span><span class="nv"> </span><span class="s">}}&quot;</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">index</span><span class="nv"> </span><span class="s">.Deployment.Pods</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">}}&quot;</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">test-container</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">sh</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-c</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">echo /var/log/time.log</span>
+<span class="l l-Scalar l-Scalar-Plain">EOF</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<ul class="last simple">
+<li>Add reference to blueprints</li>
+<li>Add glossary terms<ul>
+<li>Blueprint</li>
+<li>Kansiter function</li>
+</ul>
+</li>
+</ul>
+</div>
+<p>The next CustomResource we’ll deploy is an ActionSet. An ActionSet is created
+each time we want to execute any Kanister actions. The ActionSet contains all
+the runtime information the controller needs during execution. It can contain
+multiple Actions, each acting on a different Kubernetes object. The ActionSet
+we’re about to create in this tutorial specifes the time-logger Deployment we
+created earlier and the backup action inside our Blueprint.</p>
+</div>
+<div class="section" id="simple-actionset">
+<h3><a class="toc-backref" href="#id6">Simple ActionSet</a><a class="headerlink" href="#simple-actionset" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">$ cat &lt;&lt;EOF | kubectl create -f -</span>
+<span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">cr.kanister.io/v1alpha1</span>
+<span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">ActionSet</span>
+<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">generateName</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">s3backup-</span>
+<span class="l l-Scalar l-Scalar-Plain">spec</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">actions</span><span class="p p-Indicator">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">backup</span>
+    <span class="l l-Scalar l-Scalar-Plain">blueprint</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time-log-bp</span>
+    <span class="l l-Scalar l-Scalar-Plain">object</span><span class="p p-Indicator">:</span>
+      <span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+      <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time-logger</span>
+      <span class="l l-Scalar l-Scalar-Plain">namespace</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="l l-Scalar l-Scalar-Plain">EOF</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="get-the-action-s-status">
+<h3><a class="toc-backref" href="#id7">Get the Action’s Status</a><a class="headerlink" href="#get-the-action-s-status" title="Permalink to this headline">¶</a></h3>
+<p>The controller will watch it’s current namespace for any ActionSets we create.
+Once it sees a new ActionSet, it will begin execution. Since our example is
+pretty simple, it’s probably done by the time you finished reading this. Let’s
+look at the updated status of the ActionSet and checkout the controller logs.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># get the ActionSet status</span>
+$ kubectl get actionsets.cr.kansiter.io -o yaml
+
+<span class="c1"># check the controller log</span>
+$ kubectl get pod -l <span class="nv">app</span><span class="o">=</span>kanister-operator
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="consuming-configmaps">
+<h2><a class="toc-backref" href="#id8">Consuming ConfigMaps</a><a class="headerlink" href="#consuming-configmaps" title="Permalink to this headline">¶</a></h2>
+<p>Congrats on running your first Kanister action! You were able to get data out of
+your time-logger, but if we want to really protect our time-logger’s precious
+data, we’re going to need to add some configuration.  Kanister pulls
+configuration from ConfigMaps. A reference to the ConfigMap is chosen in an
+ActionSet, the controller fetches that ConfigMap and makes it available to
+Blueprints through parameter templating.</p>
+<p>In this section of the tutorial, we’re going to use a ConfigMap to choose where
+to backup our time log. We’ll name our ConfigMap and consume it through
+argument templating in the Blueprint. We’ll map the name to a ConfigMap
+reference in the ActionSet.</p>
+<p>We create the ConfigMap with an S3 path where we’ll eventually push our time
+log. Please change the  path to something you have access to.</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">$ cat &lt;&lt;EOF | kubectl create -f -</span>
+<span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
+<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">s3-location</span>
+  <span class="l l-Scalar l-Scalar-Plain">data</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">path</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">s3://time-log-test-bucket/tutorial</span>
+<span class="l l-Scalar l-Scalar-Plain">EOF</span>
+</pre></div>
+</div>
+<p>We modify the Blueprint to consume the path from the ConfigMap. We give it a
+name <cite>location</cite> in the <cite>configMapNames</cite> section. We can access the values in the
+map through Argument templating. For now we’ll just print the path name to
+stdout, but eventually we’ll backp the time log to that path.</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">cr.kanister.io/v1alpha1</span>
+<span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Blueprint</span>
+<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time-log-bp</span>
+<span class="l l-Scalar l-Scalar-Plain">actions</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">backup</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">type</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+    <span class="l l-Scalar l-Scalar-Plain">configMapNames</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">location</span>
+    <span class="l l-Scalar l-Scalar-Plain">phases</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">func</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">KubeExec</span>
+      <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">backupToS3</span>
+      <span class="l l-Scalar l-Scalar-Plain">args</span><span class="p p-Indicator">:</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.Deployment.Namespace</span><span class="nv"> </span><span class="s">}}&quot;</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">index</span><span class="nv"> </span><span class="s">.Deployment.Pods</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">}}&quot;</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">test-container</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">sh</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-c</span>
+      <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+        <span class="no">echo /var/log/time.log</span>
+        <span class="no">echo &quot;{{ .ConfigMaps.location.Data.path }}&quot;</span>
+</pre></div>
+</div>
+<p>We create a new ActionSet that maps the name in the Blueprint, <cite>location</cite>, to
+the ConfigMap we created earlier.</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">$ cat &lt;&lt;EOF | kubectl create -f -</span>
+<span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">cr.kanister.io/v1alpha1</span>
+<span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">ActionSet</span>
+<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">generateName</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">s3backup-</span>
+<span class="l l-Scalar l-Scalar-Plain">spec</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">actions</span><span class="p p-Indicator">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">backup</span>
+    <span class="l l-Scalar l-Scalar-Plain">blueprint</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time-log-bp</span>
+    <span class="l l-Scalar l-Scalar-Plain">object</span><span class="p p-Indicator">:</span>
+      <span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+      <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time-logger</span>
+      <span class="l l-Scalar l-Scalar-Plain">namespace</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+    <span class="l l-Scalar l-Scalar-Plain">configMaps</span><span class="p p-Indicator">:</span>
+      <span class="l l-Scalar l-Scalar-Plain">location</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">s3-location</span>
+        <span class="l l-Scalar l-Scalar-Plain">namespace</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="l l-Scalar l-Scalar-Plain">EOF</span>
+</pre></div>
+</div>
+<p>You can use the commands in XXX to check that the controller rendered the
+values in the ConfigMap and they were successfully printed in the controller
+log.</p>
+</div>
+<div class="section" id="consuming-secrets">
+<h2><a class="toc-backref" href="#id9">Consuming Secrets</a><a class="headerlink" href="#consuming-secrets" title="Permalink to this headline">¶</a></h2>
+<p>In order for us to actually push the time log to s3, we’ll need to get
+credentials. In kubernetes, credentials are stored in secrets. Kanister supports
+in the same way it supports ConfigMaps. The secret is named and rendered in the
+blueprint. The name to reference mapping is created in the ActionSet.</p>
+<p>In our example, we’ll need to use secrets to push the time log to S3.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Secrets may contain sensitive information. It is up to the author of each
+blueprint to guarantee that secrets are not logged.</p>
+</div>
+<p>This step requires a bit of homework. You’ll need to create aws credentials that
+have read/write access to the bucket you specified in the ConfigMap. Fill them
+in below and use kubectl to create the secret.</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Secret</span>
+<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">aws-creds</span>
+<span class="l l-Scalar l-Scalar-Plain">type</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Opaque</span>
+<span class="l l-Scalar l-Scalar-Plain">data</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">aws_access_key_id</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">XXXX</span>
+  <span class="l l-Scalar l-Scalar-Plain">aws_secret_access_key</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">XXXX</span>
+</pre></div>
+</div>
+<p>Name the secret in the <cite>secretNames</cite> section. We can then consume it through
+templates and assign it to bash variables. Because we now have access to the
+bucket in the ConfigMap, we can also push the log to S3. In this Secret, we
+store the credentials as binary data. We can use the templating engines
+<cite>toString</cite> function, courtesy of sprig (TODO: Add reference).</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">cr.kanister.io/v1alpha1</span>
+<span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Blueprint</span>
+<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time-log-bp</span>
+<span class="l l-Scalar l-Scalar-Plain">actions</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">backup</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">type</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+    <span class="l l-Scalar l-Scalar-Plain">configMapNames</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">location</span>
+    <span class="l l-Scalar l-Scalar-Plain">secretNames</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">aws</span>
+    <span class="l l-Scalar l-Scalar-Plain">phases</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">func</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">KubeExec</span>
+      <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">backupToS3</span>
+      <span class="l l-Scalar l-Scalar-Plain">args</span><span class="p p-Indicator">:</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.Deployment.Namespace</span><span class="nv"> </span><span class="s">}}&quot;</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">index</span><span class="nv"> </span><span class="s">.Deployment.Pods</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">}}&quot;</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">test-container</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">sh</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-c</span>
+      <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+        <span class="no">AWS_ACCESS_KEY_ID={{ .Secrets.aws.Data.aws_access_key_id | toString }}         \</span>
+        <span class="no">AWS_SECRET_ACCESS_KEY={{ .Secrets.aws.Data.aws_secret_access_key | toString }} \</span>
+        <span class="no">aws s3 cp /var/log/time.log &quot;{{ .ConfigMaps.location.Data.path }}&quot;</span>
+</pre></div>
+</div>
+<p>We create an ActionSet that has the name to Secret reference under its <cite>secrets</cite>
+field.</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">cr.kanister.io/v1alpha1</span>
+<span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">ActionSet</span>
+<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">generateName</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">s3backup-</span>
+<span class="l l-Scalar l-Scalar-Plain">spec</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">actions</span><span class="p p-Indicator">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">backup</span>
+    <span class="l l-Scalar l-Scalar-Plain">blueprint</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time-log-bp</span>
+    <span class="l l-Scalar l-Scalar-Plain">object</span><span class="p p-Indicator">:</span>
+      <span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+      <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time-logger</span>
+      <span class="l l-Scalar l-Scalar-Plain">namespace</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+    <span class="l l-Scalar l-Scalar-Plain">configMaps</span><span class="p p-Indicator">:</span>
+      <span class="l l-Scalar l-Scalar-Plain">location</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">s3-location</span>
+        <span class="l l-Scalar l-Scalar-Plain">namespace</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+    <span class="l l-Scalar l-Scalar-Plain">secrets</span><span class="p p-Indicator">:</span>
+      <span class="l l-Scalar l-Scalar-Plain">aws</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">aws-creds</span>
+        <span class="l l-Scalar l-Scalar-Plain">namespace</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="artifacts">
+<h2><a class="toc-backref" href="#id10">Artifacts</a><a class="headerlink" href="#artifacts" title="Permalink to this headline">¶</a></h2>
+<p>We’re pushing objects to S3 now, but we’re not done yet. We now need to retrieve
+the logs we’ve pushed to S3. Kanister provides an Artifact mechanism to track
+and retrieve data we’ve externalized. Artifacts may be consumed or created
+inside blueprints.</p>
+<p>An Artifact is a set of key value pairs. it is up to us to put the required
+information in Artifacts.</p>
+<div class="section" id="output-artifacts">
+<h3><a class="toc-backref" href="#id11">Output Artifacts</a><a class="headerlink" href="#output-artifacts" title="Permalink to this headline">¶</a></h3>
+<p>Output artifacts are named and populated by blueprints. They are the only
+template parameter that can be rendered using other template parameters. This
+allows them to be configured based on ConfigMaps, Secrets and the current state
+of the application. After a phase executes successfully, the rendered artifact
+will be included in the ActionSet.</p>
+<p>In our example, we’ll create an outputArtifact called <cite>timeLog</cite> that contains
+the full path of our data in S3. This path’s base will be configured using a
+ConfigMap.</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">cr.kanister.io/v1alpha2</span>
+  <span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Blueprint</span>
+  <span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time-log-bp</span>
+<span class=" -Error">  </span><span class="l l-Scalar l-Scalar-Plain">actions</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">backup</span><span class="p p-Indicator">:</span>
+      <span class="l l-Scalar l-Scalar-Plain">type</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+      <span class="l l-Scalar l-Scalar-Plain">configMapNames</span><span class="p p-Indicator">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">location</span>
+      <span class="l l-Scalar l-Scalar-Plain">secretNames</span><span class="p p-Indicator">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">aws</span>
+      <span class="l l-Scalar l-Scalar-Plain">outputArtifacts</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">timeLog</span><span class="p p-Indicator">:</span>
+          <span class="l l-Scalar l-Scalar-Plain">path</span><span class="p p-Indicator">:</span> <span class="s">&#39;{{</span><span class="nv"> </span><span class="s">.ConfigMaps.location.Data.path</span><span class="nv"> </span><span class="s">}}/time-log/&#39;</span>
+      <span class="l l-Scalar l-Scalar-Plain">phases</span><span class="p p-Indicator">:</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">func</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">KubeExec</span>
+          <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">backupToS3</span>
+          <span class="l l-Scalar l-Scalar-Plain">args</span><span class="p p-Indicator">:</span>
+          <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.Deployment.Namespace</span><span class="nv"> </span><span class="s">}}&quot;</span>
+          <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">index</span><span class="nv"> </span><span class="s">.Deployment.Pods</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">}}&quot;</span>
+          <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">test-container</span>
+          <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">sh</span>
+          <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-c</span>
+          <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+            <span class="no">AWS_ACCESS_KEY_ID={{ .Secrets.aws.Data.aws_access_key_id | toString }}         \</span>
+            <span class="no">AWS_SECRET_ACCESS_KEY={{ .Secrets.aws.Data.aws_secret_access_key | toString }} \</span>
+            <span class="no">aws s3 cp /var/log/time.log &quot;{{ .ArtifactsOut.timeLog.path }}&quot;</span>
+</pre></div>
+</div>
+<p>If you re-execute this Kanister Action, you’ll be able to see the Artifact in the
+ActionSet status.</p>
+</div>
+<div class="section" id="input-artifacts">
+<h3><a class="toc-backref" href="#id12">Input Artifacts</a><a class="headerlink" href="#input-artifacts" title="Permalink to this headline">¶</a></h3>
+<p>Kanister can consume artifacts it creates using <cite>inputArtifacts</cite>.
+<cite>inputArtifacts</cite> are named in blueprints and are explit in the ActionSet.</p>
+<p>In our example we’ll restore an older time log. We’ve already stored the time
+log in S3 and created an Artifact using the backup action. We’ll now restore
+that time log by using a new restore action.</p>
+<p>We create a new ActionSet on our <cite>time-logger</cite> deployment with the action name
+<cite>restore</cite>. This time we also include the full path in S3 as an Artifact.</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">cr.kanister.io/v1alpha1</span>
+<span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">ActionSet</span>
+<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">generateName</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">s3restore</span>
+<span class="l l-Scalar l-Scalar-Plain">spec</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">actions</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">restore</span>
+      <span class="l l-Scalar l-Scalar-Plain">blueprint</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time-log-bp</span>
+      <span class="l l-Scalar l-Scalar-Plain">object</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+        <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time-logger</span>
+        <span class="l l-Scalar l-Scalar-Plain">namespace</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">default</span>
+      <span class="l l-Scalar l-Scalar-Plain">artifacts</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">timeLog</span><span class="p p-Indicator">:</span>
+          <span class="l l-Scalar l-Scalar-Plain">path</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">s3://time-log-test-bucket/tutorial/time.log</span>
+</pre></div>
+</div>
+<p>We add a restore action to the blueprint. This action does not need the
+ConfigMap because the <cite>inputArtifact</cite> contains the fully specified path.</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">apiVersion</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">cr.kanister.io/v1alpha1</span>
+<span class="l l-Scalar l-Scalar-Plain">kind</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Blueprint</span>
+<span class="l l-Scalar l-Scalar-Plain">metadata</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">time-log-bp</span>
+<span class="l l-Scalar l-Scalar-Plain">actions</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">backup</span><span class="p p-Indicator">:</span>
+<span class="nn">...</span>
+  <span class="l l-Scalar l-Scalar-Plain">restore</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">type</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+    <span class="l l-Scalar l-Scalar-Plain">secretNames</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">aws</span>
+    <span class="l l-Scalar l-Scalar-Plain">inputArtifactNames</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">timeLog</span>
+    <span class="l l-Scalar l-Scalar-Plain">phases</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">func</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">KubeExec</span>
+      <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">restoreFromS3</span>
+      <span class="l l-Scalar l-Scalar-Plain">args</span><span class="p p-Indicator">:</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.Deployment.Namespace</span><span class="nv"> </span><span class="s">}}&quot;</span>
+      <span class="p p-Indicator">-</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">index</span><span class="nv"> </span><span class="s">.Deployment.Pods</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">}}&quot;</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">test-container</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">sh</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">-c</span>
+      <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+        <span class="no">AWS_ACCESS_KEY_ID={{ .Secrets.aws.Data.aws_access_key_id | toString }}         \</span>
+        <span class="no">AWS_SECRET_ACCESS_KEY={{ .Secrets.aws.Data.aws_secret_access_key | toString }} \</span>
+        <span class="no">aws s3 cp &quot;{{ .ArtifactsIn.timeLog.path }}&quot; /var/log/time.log</span>
+</pre></div>
+</div>
+<p>We can check the controller logs to see that the time log was restored
+successfully</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">We’ve omitted the backup action for brevity.</p>
+</div>
+</div>
+</div>
+<div class="section" id="time">
+<h2><a class="toc-backref" href="#id13">Time</a><a class="headerlink" href="#time" title="Permalink to this headline">¶</a></h2>
+<div class="admonition-todo admonition" id="index-1">
+<p class="first admonition-title">Todo</p>
+<p class="last">Include and example using time.
+‘{{ .ConfigMaps.location.Data.path }}/time-log/{{ toDate “2006-01-02T15:04:05.999999999Z07:00” .Time  | date “2006-01-02” }}’</p>
+</div>
+</div>
+<div class="section" id="using-kanctl-to-chain-actionsets">
+<h2><a class="toc-backref" href="#id14">Using kanctl to Chain ActionSets</a><a class="headerlink" href="#using-kanctl-to-chain-actionsets" title="Permalink to this headline">¶</a></h2>
+<div class="admonition-todo admonition" id="index-2">
+<p class="first admonition-title">Todo</p>
+<p class="last">Add an example on how to use kanctl</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorial</a><ul>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#example-application">Example Application</a></li>
+<li><a class="reference internal" href="#invoking-kanister-actions">Invoking Kanister Actions</a><ul>
+<li><a class="reference internal" href="#simple-blueprint">Simple Blueprint</a></li>
+<li><a class="reference internal" href="#simple-actionset">Simple ActionSet</a></li>
+<li><a class="reference internal" href="#get-the-action-s-status">Get the Action’s Status</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#consuming-configmaps">Consuming ConfigMaps</a></li>
+<li><a class="reference internal" href="#consuming-secrets">Consuming Secrets</a></li>
+<li><a class="reference internal" href="#artifacts">Artifacts</a><ul>
+<li><a class="reference internal" href="#output-artifacts">Output Artifacts</a></li>
+<li><a class="reference internal" href="#input-artifacts">Input Artifacts</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#time">Time</a></li>
+<li><a class="reference internal" href="#using-kanctl-to-chain-actionsets">Using kanctl to Chain ActionSets</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="install.html" title="previous chapter">Installing Kanister</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/tutorial.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Kasten.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/tutorial.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

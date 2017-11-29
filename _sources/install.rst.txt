@@ -1,0 +1,73 @@
+.. _install:
+
+Installing Kanister
+===================
+
+.. contents:: Installation Overview
+  :local:
+
+Quickstart 
+----------
+
+This will install the controller in the default namespace
+
+.. code-block:: bash
+
+   # pull the kanister repo
+   $ git clone git@github.com:kanisterio/kanister.git
+
+   # install Kanister operator controller in the default namepsace
+   $ kubectl -f apply kanister/bundle.yaml
+
+.. todo::
+
+   Consider using `make deploy` in the quickstart section
+
+
+Prerequisites
+-------------
+
+* kubernetes 1.7 or higher
+
+* `kubectl <https://kubernetes.io/docs/tasks/tools/install-kubectl/>`_ installed
+  and setup
+
+* docker
+
+Building and Deploying from Source
+----------------------------------
+
+To build, package and deploy the controller to your kubernetes cluster. It will
+push the controller docker image to your docker repo `<MY REGISTRY>`
+
+.. code-block:: bash
+
+   # build controller binary
+   $ make build
+
+   # package the binary in a docker image and push it to your image registry
+   $ make push REGISTRY=<MY REGISTRY>
+
+   # deploy the controller to your kubernetes repo
+   $ make deploy REGISTRY=<MY REGISTRY>
+
+
+Deploy Released Controller
++++++++++++++++++++++++++
+
+Deploy a realeased version of the controller to a specific namespace
+`<NAMESPACE>`
+
+.. code-block:: bash
+
+   # build controller binary
+   $ make deploy NAMESPACE=<NAMESPACE> VERSION="0.1.0"
+
+.. todo::
+
+   * Namespaces currently not supported.
+
+   * Package images in kanisterio/kanister based on tagged versions.
+
+.. spelling::
+   kubectl
