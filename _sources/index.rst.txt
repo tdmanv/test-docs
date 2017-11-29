@@ -1,0 +1,60 @@
+.. kanister documentation master file, created by
+   sphinx-quickstart on Tue Nov 28 22:36:58 2017.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to kanister's documentation!
+====================================
+
+Kanister allows domain experts to capture application specific data management
+tasks in blueprints which can be easily shared and extended. The framework takes
+care of the tedious details around execution on Kubernetes and presents a
+homogeneous operational experience across applications at scale. 
+
+Overview
+--------
+
+.. todo::
+   content
+
+Quickstart
+----------
+
+.. todo::
+   Include link to README
+
+.. code-block:: bash
+
+   $ git clone git@github.com:kanisterio/kanister.git
+
+   # install Kanister operator controller
+   $ kubectl -f apply bundle.yaml
+
+   # install your application
+   $ kubectl -f apply examples/mongo-sidecar/mongo-replicaset.yaml
+
+   # use an existing blueprint, tweak one, or create one yourself
+   $ kubectl -f apply examples/mongo-sidecar/mongo-blueprint.yaml
+
+   # perform operations
+   $ kubectl -f apply examples/mongo-sidecar/backup-actionset.yaml
+
+
+To get up an running using Kanister, we reccommend :ref:`install` and working
+through the :ref:`tutorial` 
+
+Documentation
+-------------
+
+.. toctree::
+   :maxdepth: 2
+
+   self
+   install
+   tutorial
+   operator
+   templates
+   functions
+   kanctl
+   examples
+   development
